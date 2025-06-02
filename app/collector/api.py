@@ -16,7 +16,7 @@ def get_session():
 
 def get_output_collector(collector):
 	return CollectorOutputModel(
-		id=collector.id,
+		# id=collector.id,
 		username=collector.username,
 		email=collector.email,
 		cars=[get_output_car(car) for car in collector.cars])
