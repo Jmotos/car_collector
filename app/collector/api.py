@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException
+from typing import List
 
 from .repository import CollectorRepository
 from .collector import Collector
-from .model import CollectorModel, CollectorUpdateModel
-from ..car.model import CarModel
+from .model import CollectorModel, CollectorUpdateModel, CollectorOutputModel
+from ..car.model import CarModel, CarOutputModel
 from ..db.db import Database
 import builder
-from ..logger.logger import logger
 
 router = APIRouter(prefix="/collectors")
 
@@ -14,32 +14,45 @@ def get_session():
 	db = Database()
 	return db.get_session()
 
+def get_output_collector(collector):
+	return CollectorOutputModel(
+		id=collector.id,
+		username=collector.username,
+		email=collector.email,
+		cars=[get_output_car(car) for car in collector.cars])
 
-@router.middleware("http")
-def log_requests(request, call_next):
-	logger.info(f"Request: {request.method} {request.url}")
-	response = call_next(request)
-	logger.info(f"Response status: {response}")
-	return response
+def get_output_collectors(collectors):
+	return [CollectorOutputModel(
+		username=collector.username,
+		email=collector.email,
+		cars=[get_output_car(car) for car in collector.cars]
+	) for collector in collectors]
 
-@router.get("/")
+def get_output_car(car):
+	return CarOutputModel(
+		make=car.make,
+		model=car.model,
+		year=car.year,
+		price=car.price
+	)
+
+@router.get("/", response_model=List[CollectorOutputModel])
 def get_all():
 	session = get_session()
 	repository = CollectorRepository(session)
 	collectors = repository.get_all()
 	session.close()
-	return collectors
+	return [get_output_collector(collector) for collector in collectors]
 
-@router.get("/{username}")
+@router.get("/{username}", response_model=CollectorOutputModel)
 def get_by_username(username: str):
-	# logger.info(f"Username: {username}")
 	session = get_session()
 	repository = CollectorRepository(session)
 	collector = repository.get(username)
 	session.close()
 	if not collector:
 		raise HTTPException(status_code=404, detail="Collector not found")
-	return collector
+	return get_output_collector(collector)
 
 @router.post("/")
 def create(model: CollectorModel):
@@ -48,7 +61,11 @@ def create(model: CollectorModel):
 	collector = Collector(model, repository)
 	collector.persist()
 	session.close()
-	return {"msg": "Collector created successfully", "collector": collector}
+	return {
+		"msg": "Collector created successfully",
+		"status_code": 201,
+		"collector": get_output_collector(collector)
+	}
 
 @router.put("/{username}")
 def update_email(username: str, update: CollectorUpdateModel):
@@ -58,24 +75,37 @@ def update_email(username: str, update: CollectorUpdateModel):
 	if not collector:
 		session.close()
 		raise HTTPException(status_code=404, detail="Collector not found")
+	if not update.email:
+		session.close()
+		raise HTTPException(status_code=400, detail="Email is required for update")
 	repository.update_email(username, update)
 	session.close()
-	return {"msg": "Collector updated successfully", "collector": collector}
+	return {
+		"msg": "Collector updated successfully",
+		"status_code": 200,
+		"collector": get_output_collector(collector)
+	}
 
-@router.get("/{username}/cars")
+@router.get("/{username}/cars", response_model=List[CarOutputModel])
 def get_cars(username: str):
 	session = get_session()
 	collector = builder.build_collector(username, session)
 	session.close()
 	if not collector:
-		raise HTTPException(status_code=404, detail="Collector not found")	
-	cars = collector.cars
-	return {"msg": cars}
+		raise HTTPException(status_code=404, detail="Collector not found")
+	return [get_output_car(car) for car in collector.cars]
 
 @router.post("/{username}/car")
 def add_car(username: str, car: CarModel):
 	session = get_session()
 	collector = builder.build_collector(username, session)
+	if not collector:
+		session.close()
+		raise HTTPException(status_code=404, detail="Collector not found")
 	collector.add_car(car)
 	session.close()
-	return {"msg": "Car added successfully", "car": car}
+	return {
+		"msg": f"Car added successfully to {username}",
+		"status_code": 201,
+		"car": get_output_car(car)
+	}

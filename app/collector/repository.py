@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, joinedload
 from sqlalchemy.ext.declarative import declarative_base
-from ..db.db import Base
+from app.db.base import Base
 
 class CollectorDB(Base):
 	__tablename__ = "collectors"
@@ -15,13 +15,13 @@ class CollectorRepository():
 		self.__db_session = db_session
 
 	def get(self, username: str):
-		return self.__db_session.query(CollectorDB).filter(CollectorDB.username == username).first()
+		return self.__db_session.query(CollectorDB).filter(CollectorDB.username == username).options(joinedload(CollectorDB.cars)).first()
 	
 	def get_by_email(self, email: str):
 		return self.__db_session.query(CollectorDB).filter(CollectorDB.email == email).first()
 	
 	def get_all(self):
-		return self.__db_session.query(CollectorDB).all()
+		return self.__db_session.query(CollectorDB).options(joinedload(CollectorDB.cars)).all()
 
 	def create(self, collector):
 		new_collector = CollectorDB(
@@ -35,6 +35,8 @@ class CollectorRepository():
 	
 	def update_email(self, username: str, update):
 		collector = self.get(username)
+		print(update)
+		print(update.email)
 		collector.email = update.email
 		self.__db_session.commit()
 		self.__db_session.refresh(collector)
