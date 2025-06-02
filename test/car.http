@@ -1,0 +1,57 @@
+@host = http://127.0.0.1:8000/collectors
+@collector = TestCollector
+@non_existing_collector = non_existing_collector
+@non_existing_make = non_existing_make
+@existing_make = Acura
+@non_existing_model = non_existing_model
+@existing_model = MDX
+
+### ERROR: get cars from non existing collector
+GET {{host}}/{{non_existing_collector}}/cars HTTP/1.1
+
+### get cars from collector
+GET {{host}}/{{collector}}/cars HTTP/1.1
+
+### ERROR: create car with non existing model
+POST {{host}}/{{collector}}/car HTTP/1.1
+Content-Type: application/json
+
+{
+  "make": "{{existing_make}}",
+  "model": "{{non_existing_model}}",
+  "year": 2020,
+  "price": 60000
+}
+
+### ERROR: create car with non existing make
+POST {{host}}/{{collector}}/car HTTP/1.1
+Content-Type: application/json
+
+{
+  "make": "{{non_existing_make}}",
+  "model": "{{existing_model}}",
+  "year": 2020,
+  "price": 60000
+}
+
+### ERROR: create car for a non existing collector
+POST {{host}}/{{non_existing_collector}}/car HTTP/1.1
+Content-Type: application/json
+
+{
+  "make": "{{existing_make}}",
+  "model": "{{existing_model}}",
+  "year": 2020,
+  "price": 60000
+}
+
+### create car for collector
+POST {{host}}/{{collector}}/car HTTP/1.1
+Content-Type: application/json
+
+{
+  "make": "{{existing_make}}",
+  "model": "{{existing_model}}",
+  "year": 2020,
+  "price": 60000
+}

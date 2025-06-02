@@ -1,23 +1,21 @@
-@host = http://127.0.0.1:8000
+@host = http://127.0.0.1:8000/collectors
 @non_existing_collector = non_existing_collector
 @valid_email = ab@gmail.com
 @valid_email2 = abc@gmail.com
+@valid_email3 = abcd@gmail.com
 @wrong_email = wrong_email_format
 @valid_username = TestCollector
 @valid_username2 = Test Collector 2
 @wrong_username = ab
 
 ### get all collectors
-GET {{host}}/collectors HTTP/1.1
+GET {{host}} HTTP/1.1
 
 ### ERROR: get non existing collector
-GET {{host}}/collectors/{{non_existing_collector}} HTTP/1.1
-
-### ERROR: get cars from non existing collector
-GET {{host}}/collectors/{{non_existing_collector}}/cars HTTP/1.1
+GET {{host}}/{{non_existing_collector}} HTTP/1.1
 
 ### ERROR: create collector with incorrect email
-POST {{host}}/collectors HTTP/1.1
+POST {{host}} HTTP/1.1
 Content-Type: application/json
 
 {
@@ -26,7 +24,7 @@ Content-Type: application/json
 }
 
 ### ERROR: create collector with incorrect username
-POST {{host}}/collectors HTTP/1.1
+POST {{host}} HTTP/1.1
 Content-Type: application/json
 
 {
@@ -35,7 +33,7 @@ Content-Type: application/json
 }
 
 ### create collector
-POST {{host}}/collectors HTTP/1.1
+POST {{host}} HTTP/1.1
 Content-Type: application/json
 
 {
@@ -44,10 +42,10 @@ Content-Type: application/json
 }
 
 ### get collector by username
-GET {{host}}/collectors/{{valid_username}} HTTP/1.1
+GET {{host}}/{{valid_username}} HTTP/1.1
 
 ### ERROR: update collector with incorrect email
-PUT {{host}}/collectors/{{valid_username}} HTTP/1.1
+PUT {{host}}/{{valid_username}} HTTP/1.1
 Content-Type: application/json
 
 {
@@ -55,17 +53,15 @@ Content-Type: application/json
 }
 
 ### update collector email
-PUT {{host}}/collectors/{{valid_username}} HTTP/1.1
+PUT {{host}}/{{valid_username}} HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "{{valid_email2}}"
+  "email": "{{valid_email}}"
 }
 
-### try to update collector username, nothing happend
-PUT {{host}}/collectors/{{valid_username}} HTTP/1.1
+### ERROR: update collector without email
+PUT {{host}}/{{valid_username}} HTTP/1.1
 Content-Type: application/json
 
-{
-  "username": "{{valid_username2}}"
-}
+{ }

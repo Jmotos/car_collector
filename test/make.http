@@ -1,0 +1,15 @@
+@host = http://127.0.0.1:8000/makes
+@existing_make = Acura
+@non_existing_make = non_existing_make
+@existing_model = MDX
+@non_existing_model = non_existing_model
+
+### get all makes
+GET {{host}} HTTP/1.1
+
+### ERROR: get non existing make
+GET {{host}}/{{non_existing_make}} HTTP/1.1
+
+### get existing make
+GET {{host}}/{{existing_make}} HTTP/1.1
+

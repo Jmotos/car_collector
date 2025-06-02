@@ -1,7 +1,9 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator
 from typing import List, Optional
+
 from .repository import CollectorRepository
-from ..db.db import Database
+from app.car.model import CarOutputModel
+from app.db.db import Database
 
 database = Database()
 
@@ -20,6 +22,7 @@ def username_exists(username: str):
 	return existing_user is not None
 
 class CollectorModel(BaseModel):
+	id: Optional[int] = None
 	username: str = Field(..., min_length=8, max_length=20)
 	email: EmailStr
 
@@ -28,7 +31,7 @@ class CollectorModel(BaseModel):
 		if username_exists(value):
 			raise ValueError(f"Username '{value}' already exists.")
 		return value
-	
+
 	@field_validator("email")
 	def validate_email(cls, value):
 		if email_exists(value):
@@ -38,3 +41,8 @@ class CollectorModel(BaseModel):
 class CollectorUpdateModel(CollectorModel):
 	username: Optional[str] = None
 	email: Optional[EmailStr] = None
+
+class CollectorOutputModel(BaseModel):
+	username: str
+	email: EmailStr
+	cars: List[CarOutputModel] = []
