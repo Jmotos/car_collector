@@ -1,22 +1,22 @@
 import logging
+import os
+import asyncio
+import httpx
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional
+from dotenv import load_dotenv
 
 from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from app.car.model import CarModel
-from app.car.api import router as car_router
 from app.collector.api import router as collector_router
-
-logging.basicConfig(
-	level=logging.INFO,  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-	format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+from app.make.api import router as make_router
+from app.make.repository import MakeRepository
+from app.db.db import Database
 
 app = FastAPI(
 	title="Car collector API",
@@ -24,31 +24,29 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.include_router(car_router)
+database = Database()
+
+async def initialize_makes_and_models(session):
+	makes_repository = MakeRepository(session)
+	if not makes_repository.is_empty():
+		session.close()
+		return
+	load_dotenv()
+	makes_url = "https://car-api2.p.rapidapi.com/api/models?sort=id&direction=asc&year=2020&verbose=yes"
+	headers = {
+		"x-rapidapi-host": "car-api2.p.rapidapi.com",
+		"x-rapidapi-key": os.getenv("RAPIDAPI_KEY")
+	}
+	async with httpx.AsyncClient() as client:
+		response = await client.get(makes_url, headers=headers)
+		json_response = response.json()
+	makes_repository.create_makes_and_models(json_response["data"])
+	session.close()
+
 app.include_router(collector_router)
+app.include_router(make_router)
 
-@app.middleware("http")
-def log_requests(request, call_next):
-	logger.info(f"Request: {request.method} {request.url}")
-	response = call_next(request)
-	logger.info(f"Response status: {response}")
-	return response
-
-@app.get("/offers")
-def get_offers():
-	return {"msg": "Hola mundo!!!"}
-
-@app.get("/offers/{brand}")
-def get_offers_by_brand():
-	return {"msg": "Hola mundo!!!"}
-
-@app.get("/offers/{brand}/{model}")
-def get_offers_by_model():
-	return {"msg": "Hola mundo!!!"}
-
-@app.post("/offers")
-def make_offer(username: str, car: CarModel):
-	return {"msg": "Hola mundo!!!"}
-
-
-STATUS = ["owner", "available", "sold"]
+@app.on_event("startup")
+async def startup_event():
+    session = database.get_session()
+    await initialize_makes_and_models(session)
