@@ -67,6 +67,19 @@ def create(model: CollectorModel):
 		"collector": get_output_collector(collector)
 	}
 
+@router.delete("/{username}")
+def delete(username: str):
+	session = get_session()
+	repository = CollectorRepository(session)
+	collectorExists = repository.delete(username)
+	session.close()
+	if not collectorExists:
+		raise HTTPException(status_code=404, detail="Collector not found")
+	return {
+		"msg": "Collector deleted successfully",
+		"status_code": 200
+	}
+
 @router.put("/{username}")
 def update_email(username: str, update: CollectorUpdateModel):
 	session = get_session()
