@@ -1,18 +1,10 @@
 import logging
 import os
-import asyncio
 import httpx
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field, field_validator, model_validator
-from typing import Optional
+from fastapi import FastAPI
 from dotenv import load_dotenv
 
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-from app.car.model import CarModel
 from app.collector.api import router as collector_router
 from app.make.api import router as make_router
 from app.make.repository import MakeRepository

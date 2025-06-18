@@ -1,4 +1,3 @@
-# from app.car.car import Car
 from app.collector.collector import Collector
 from app.collector.repository import CollectorRepository, CollectorDB
 from app.car.repository import CarRepository

@@ -44,6 +44,21 @@ Content-Type: application/json
 ### get collector by username
 GET {{host}}/{{valid_username}} HTTP/1.1
 
+### ERROR: delete non existing collector
+DELETE {{host}}/{{non_existing_collector}} HTTP/1.1
+
+### create collector 2
+POST {{host}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "{{valid_username2}}",
+  "email": "{{valid_email3}}"
+}
+
+### delete collector 2
+DELETE {{host}}/{{valid_username2}} HTTP/1.1
+
 ### ERROR: update collector with incorrect email
 PUT {{host}}/{{valid_username}} HTTP/1.1
 Content-Type: application/json
@@ -57,7 +72,7 @@ PUT {{host}}/{{valid_username}} HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "{{valid_email}}"
+  "email": "{{valid_email2}}"
 }
 
 ### ERROR: update collector without email

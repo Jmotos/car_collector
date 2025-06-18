@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship, joinedload
-from sqlalchemy.ext.declarative import declarative_base
 from app.db.base import Base
 
 class CollectorDB(Base):
@@ -32,6 +31,14 @@ class CollectorRepository():
 		self.__db_session.commit()
 		self.__db_session.refresh(new_collector)
 		return new_collector
+	
+	def delete(self, username: str):
+		collector = self.get(username)
+		if not collector:
+			return False
+		self.__db_session.delete(collector)
+		self.__db_session.commit()
+		return True
 	
 	def update_email(self, username: str, update):
 		collector = self.get(username)
