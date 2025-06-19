@@ -1,0 +1,10 @@
+car_collector.db
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+venv/
+
+.env

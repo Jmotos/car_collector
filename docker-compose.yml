@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: car_collector
+    ports:
+      - "8000:8000"
+    volumes:
+      - db_data:/app/db
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY:?Is mandatory to inform RAPIDAPI_KEY}
+    networks:
+      - backend_net
+
+volumes:
+  db_data:
+
+networks:
+  backend_net:
+    driver: bridge
