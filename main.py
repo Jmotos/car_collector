@@ -4,7 +4,6 @@ import logging
 import json
 
 from fastapi import FastAPI, Request, Response
-from dotenv import load_dotenv
 
 from app.collector.api import router as collector_router
 from app.make.api import router as make_router
@@ -30,7 +29,11 @@ async def initialize_makes_and_models(session):
 	if not makes_repository.is_empty():
 		session.close()
 		return
-	load_dotenv()
+	api_key = os.getenv("RAPIDAPI_KEY")
+	if not api_key:
+		logger.error("RAPIDAPI_KEY not found in environment variables.")
+		session.close()
+		return
 	makes_url = "https://car-api2.p.rapidapi.com/api/models?sort=id&direction=asc&year=2020&verbose=yes"
 	headers = {
 		"x-rapidapi-host": "car-api2.p.rapidapi.com",

@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 
 from .base import Base
 
-DATABASE_URL = "sqlite:///./car_collector.db"
+DATABASE_URL = "sqlite:///./db/car_collector.db"
 
 class Database:
 	def __init__(self):

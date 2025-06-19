@@ -7,11 +7,12 @@ Pontia: API para gestionar colecciones de coches
 
 ## Características principales
 
-- Gestión de coleccionistas (alta, consulta, modificación)
+- Gestión de coleccionistas (alta, consulta, modificación y eliminación)
 - Asociación de coches a coleccionistas
 - Consulta de marcas y modelos de coches (datos obtenidos de una API externa)
 - Validación de datos con Pydantic
 - Endpoints RESTful
+- App dockerizada mediante docker-compose y que monta un volumen para persistir la base de datos
 
 ## Instalación
 
@@ -20,21 +21,14 @@ Pontia: API para gestionar colecciones de coches
    git clone git@github.com:Jmotos/car_collector.git
    ```
 
-2. Instala las dependencias:
-   ```sh
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-
-3. Crea un archivo `.env` en la raíz con tu clave de API:
+2. Crea un archivo `.env` en la raíz con tu clave de [RapidAPI](https://rapidapi.com/hub):
    ```
    RAPIDAPI_KEY=tu_clave_aqui
    ```
 
-4. Inicia la aplicación:
-   ```sh
-   uvicorn main:app --reload
+3. Ejecuta el docker-compose
+   ```
+   docker-compose up --build
    ```
 
 ## Uso
@@ -44,11 +38,12 @@ La API expone los siguientes endpoints principales:
 - `GET /collectors` — Lista todos los coleccionistas
 - `GET /collectors/{username}` — Consulta un coleccionista por nombre de usuario
 - `POST /collectors` — Crea un nuevo coleccionista
+- `DELETE /collectors` — Elimina un coleccionista existente
 - `PUT /collectors/{username}` — Actualiza el email de un coleccionista
 - `GET /collectors/{username}/cars` — Lista los coches de un coleccionista
 - `GET /makes` — Lista las marcas de coches y sus modelos
 
-Puedes probar la API usando [FastAPI](http://127.0.0.1:8000/) una vez que la app esté corriendo.
+Conecta con la API accediendo a la [url](http://127.0.0.1:8000/)
 
 ## Estructura del proyecto
 
@@ -73,9 +68,8 @@ README.md
 
 - En el directorio /test hay 3 archivos .http preparados para poder testear todas las funcionalidades de la API, así como la gestión de errores. Está diseñado para ser utilizado con la extensión [REST client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client)
 - En el directorio /test hay un archivo rest.py preparado para testear las principales funcionalidade de la API, aunque no es tan completo como los archivos .http
-- En la rama db se incluye una base de datos sqlite ya creada, por si no se dispone de la API_KEY de [RapidAPI](https://rapidapi.com/hub) para hacer el poblado de marcas y modelos en la base de datos.
 
 ## Posibles mejoras a futuro
 
 - Añadir autenticación para que solo el coleccionista pueda actualizar sus datos.
-- Añadiro una funcionalidad para que los coleccionista puedan publicar ofertas de coches para poder venderlo a otro coleccionista.
+- Añadir una funcionalidad para que los coleccionista puedan publicar ofertas de coches para poder venderlo a otro coleccionista.
